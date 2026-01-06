@@ -1,0 +1,56 @@
+networks:
+  deployment:
+    name: deployment
+    driver: bridge
+
+services:
+  database:
+    image: postgres:latest
+    container_name: database
+    restart: always
+    ports:
+      - "5432:5432"
+    networks:
+      - deployment
+    volumes:
+      - ./postgres/scripts:/docker-entrypoint-initdb.d
+      - ./postgres/config/my.cnf:/etc/postgres/conf.d/my.cnf
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  backend:
+    build:
+      context: ./backend
+    container_name: backend
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      - spring.application.name=actividad
+      - spring.datasource.url=jdbc:mysql://database:5432/javeriana_impacta
+      - spring.datasource.username=root
+      - spring.datasource.password=
+      - spring.datasource.driver.class.name=com.mysql.cj.jdbc.Driver
+      - spring.jpa.hibernate.dd.auto=update
+    ports:
+      - "8080:8080"
+    networks:
+      - deployment
+  
+  frontend:
+    build: ./skillhub
+    container_name: skillhub
+    image: skillhub:v1
+    ports:
+      - "80:80"
+    expose:
+      - 80
+    networks:
+      - deployment
+    depends_on:
+      - database
+      - backend
