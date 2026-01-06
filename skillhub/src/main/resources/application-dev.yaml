@@ -1,0 +1,35 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+  application:
+    name: skillhub
+  datasource:
+    url: jdbc:postgresql://localhost:5432/skillhub
+    username: postgres
+    password: CarrilloMora77!!
+  jpa:
+    properties:
+      hibernate:
+        ddl-auto: update
+    show-sql: true
+
+request-mapping:
+  controller:
+    allowed: /users/**
+    csrf: /**
+    course: courses
+    user: users
+    progress: progress
+    client: http://localhost:4200
+
+
+PREFIX: Bearer
+HEADER: Authorization
+ISSUER: skillhub
+SECRET: 92578deacc879c1c6e8a26e51d4f02d4f54a6ee691c7e242df7d60c6a8da5ff0
